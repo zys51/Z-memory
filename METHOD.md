@@ -1,7 +1,7 @@
 # 方法说明（Method Description）
 
 > 本文档用于比赛提交的「方法 · 论文 · 仓库」披露与复现核验。
-> 系统名：**Hybrid-Mem**（BM25 + text-embedding-v4 + RRF 混合检索记忆系统）
+> 系统名：**Z memory**（BM25 + text-embedding-v4 + RRF 混合检索记忆系统）
 
 ---
 
@@ -28,10 +28,9 @@
 平台调用
    │  POST /add          POST /search
    ▼                     ▼
-┌─────────────────────────────────────────────┐
-│ FastAPI (app/main.py)  ·  鉴权 X-Api-Key/Bearer/T
-oken │
-└─────────────────────────────────────────────┘
+┌──────────────────────────────────────────────┐
+│ FastAPI (app/main.py) · 鉴权/路由入口         │
+└──────────────────────────────────────────────┘
    │                     │
    ▼                     ▼
 MemoryEngine (app/engine.py)
@@ -89,7 +88,7 @@ python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\act
 pip install -r requirements.txt
 cp .env.example .env    # 填 DASHSCOPE_API_KEY（text-embedding-v4）
 python run.py           # 监听 0.0.0.0:8080
-# 契约测试：pip install -r requirements-dev.txt && python -m pytest tests -v  （14 个用例）
+# 契约测试：pip install -r requirements-dev.txt && python -m pytest tests -v  （15 个用例）
 ```
 
 ---
