@@ -1,8 +1,8 @@
 # Z memory
 
-一个符合 Agent Memory Leaderboard（AML）'Add/Search' 契约的轻量记忆检索服务。
+一个符合 Agent Memory Leaderboard（AML）`Add/Search` 契约的轻量记忆检索服务。
 
-- **写入（Add）**：把对话切块，用 'text-embedding-v4' 建向量索引，同时维护 BM25 关键词索引。
+- **写入（Add）**：把对话切块，用 `text-embedding-v4` 建向量索引，同时维护 BM25 关键词索引。
 - **检索（Search）**：稠密 + 稀疏双路召回，经 RRF 融合并按时间感知排序，返回原始证据片段（不生成最终答案）。
 
 ## 快速开始
