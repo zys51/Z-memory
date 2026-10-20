@@ -1,24 +1,24 @@
 # 方法说明（Method Description）
 
 > 本文档用于比赛提交的「方法 · 论文 · 仓库」披露与复现核验。
-> 系统名：**Z memory**（BM25 + text-embedding-v4 + RRF 混合检索记忆系统）
+> 系统名：Hybrid-Mem（BM25 + text-embedding-v4 + RRF 混合检索记忆系统）
 
 ---
 
-## 0. 一句话概述
+## 0. 概述
 
-一个符合 Agent Memory Leaderboard（AML）`Add/Search` 契约的轻量记忆检索服务：写入时把对话切块并建立「关键词（BM25）+ 语义向量（text-embedding-v4）」双索引；检索时混合两路信号经 RRF 融合，辅以时间感知排序，返回最相关、自包含的原始证据片段供平台统一生成答案。
+一个符合 Agent Memory Leaderboard（AML）'Add/Search' 契约的轻量记忆检索服务：写入时把对话切块并建立「关键词（BM25）+ 语义向量（text-embedding-v4）」双索引；检索时混合两路信号经 RRF 融合，辅以时间感知排序，返回最相关、自包含的原始证据片段供平台统一生成答案。
 
 ---
 
-## 1. 参赛定位与合规
+## 1. 参赛赛道与组别
 
-- 赛道：**文本（Textual）**
-- 组别：**开源方法榜 / 学术榜（Open-source）**
+- 赛道：文本
+- 组别：开源方法榜 / 学术榜
 - 模型合规：
-  - Embedding：**`text-embedding-v4`**（阿里云 DashScope，OpenAI 兼容接口）✅ 符合规则
+  - Embedding：'text-embedding-v4'（阿里云 DashScope，OpenAI 兼容接口）✅ 符合规则
   - LLM 组件：**未使用**（检索不调用任何 LLM）✅ 规避 gpt-4o-mini 依赖
-  - Reranker：**未使用**（规则允许但 v1 不引入）
+  - Reranker：**未使用**
 
 ---
 
@@ -28,9 +28,10 @@
 平台调用
    │  POST /add          POST /search
    ▼                     ▼
-┌──────────────────────────────────────────────┐
-│ FastAPI (app/main.py) · 鉴权/路由入口         │
-└──────────────────────────────────────────────┘
+┌─────────────────────────────────────────────┐
+│ FastAPI (app/main.py)  ·  鉴权 X-Api-Key/Bearer/T
+oken │
+└─────────────────────────────────────────────┘
    │                     │
    ▼                     ▼
 MemoryEngine (app/engine.py)
@@ -88,7 +89,7 @@ python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\act
 pip install -r requirements.txt
 cp .env.example .env    # 填 DASHSCOPE_API_KEY（text-embedding-v4）
 python run.py           # 监听 0.0.0.0:8080
-# 契约测试：pip install -r requirements-dev.txt && python -m pytest tests -v  （15 个用例）
+# 契约测试：pip install -r requirements-dev.txt && python -m pytest tests -v  （14 个用例）
 ```
 
 ---
