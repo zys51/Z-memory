@@ -1,0 +1,8 @@
+{"history":[{"role":"user","content":"My favorite color is blue."}],"question":"What is my favorite color?","gold":"blue"}
+{"history":[{"role":"user","content":"I work as a software engineer at Google in Mountain View."}],"question":"Where do I work?","gold":"Google"}
+{"history":[{"role":"user","content":"My dog is named Max and he is a golden retriever."}],"question":"What is my dog's name?","gold":"Max"}
+{"history":[{"role":"user","content":"I moved to Shanghai last year."},{"role":"user","content":"Actually I moved to Beijing this month."}],"question":"Which city do I live in now?","gold":"Beijing"}
+{"history":[{"role":"user","content":"My sister is getting married in Hangzhou next month."}],"question":"Where is my sister getting married?","gold":"Hangzhou"}
+{"history":[{"role":"user","content":"I am allergic to peanuts."}],"question":"What am I allergic to?","gold":"peanuts"}
+{"history":[{"role":"user","content":"I prefer window seats when booking flights."}],"question":"What seat do I prefer on flights?","gold":"window"}
+{"history":[{"role":"user","content":"My favorite programming language is Python."}],"question":"What is my favorite programming language?","gold":"Python"}
