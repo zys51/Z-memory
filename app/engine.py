@@ -11,7 +11,7 @@ from typing import Any
 from .bm25 import BM25, tokenize
 from .embedder import Embedder
 from .store import Storage
-from .vector_utils import cosine, pack_vec, unpack_vec
+from .vector_utils import cosine, pack_vec, to_vec, unpack_vec
 
 _SENT_SPLIT = re.compile(r"(?<=[.!?])\s+|\n+")
 _MAX_CHUNK_CHARS = 800
@@ -241,7 +241,7 @@ class MemoryEngine:
                     idx.contents.append(row["content"])
                     idx.created_at.append(row["created_at"])
                     idx.created_ts.append(row["created_ts"])
-                    idx.vectors.append(list(vec))
+                    idx.vectors.append(to_vec(vec))
                     idx.bm25.add(tokenize(row["content"]))
 
             return {"success": True, "skipped": False, "count": len(ids)}

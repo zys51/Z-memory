@@ -18,14 +18,21 @@ def pack_vec(vec) -> bytes:
     return struct.pack(f"{len(vec)}f", *[float(x) for x in vec])
 
 
-def unpack_vec(data: bytes) -> list:
-    """从 BLOB 还原成一维 Python list。"""
+def unpack_vec(data: bytes):
+    """从 BLOB 还原成一维向量（numpy 可用时返回 float32 数组，内存比 Python list 省约 8 倍）。"""
     if not data:
         return []
     if HAS_NUMPY:
-        return np.frombuffer(data, dtype=np.float32).tolist()
+        return np.frombuffer(data, dtype=np.float32)
     n = len(data) // 4
     return [float(x) for x in struct.unpack(f"{n}f", data)]
+
+
+def to_vec(vec):
+    """把一组浮点转成存储用的向量（numpy 可用时用 float32 数组）。"""
+    if HAS_NUMPY:
+        return np.asarray(vec, dtype=np.float32)
+    return [float(x) for x in vec]
 
 
 def cosine(matrix, query) -> list:
