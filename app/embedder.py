@@ -14,14 +14,14 @@ import httpx
 from . import config
 
 _TOKEN_RE = re.compile(r"[a-z0-9]+")
-_MAX_EMBED_CHARS = 6000
+_MAX_EMBED_CHARS = 2000
 
 
 def _truncate(text: str) -> str:
     """超长文本截断：保留开头（通常是问题）和结尾，避免超过嵌入接口输入上限（400）。"""
     if len(text) <= _MAX_EMBED_CHARS:
         return text
-    return text[:4000] + " " + text[-2000:]
+    return text[:1500] + " " + text[-500:]
 
 
 def hash_embed(texts: list[str], dim: int) -> list[list[float]]:
@@ -88,6 +88,8 @@ class Embedder:
                 headers={"Authorization": f"Bearer {self.api_key}"},
                 json=payload,
             )
+            if resp.status_code != 200:
+                print(f"[EMBED_ERR] status={resp.status_code} body={resp.text[:500]!r} input={chunk[0][:160]!r}", flush=True)
             resp.raise_for_status()
             data = resp.json()["data"]
             data = sorted(data, key=lambda d: d.get("index", 0))

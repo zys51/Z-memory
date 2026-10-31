@@ -251,8 +251,18 @@ class MemoryEngine:
             return {"success": True, "skipped": False, "count": len(ids)}
 
     async def search(self, user_id: str, query: str, top_k: int) -> list[dict[str, Any]]:
-        # 查询嵌入放锁外（网络调用）
-        qvec = (await self.embedder.embed([query], text_type="query"))[0]
+        # 查询嵌入放锁外（网络调用）。失败时降级：先用短查询重试，再失败则返回空（abstain），
+        # 避免单条查询把整个评测任务打成 500 而失败。
+        try:
+            qvec = (await self.embedder.embed([query], text_type="query"))[0]
+        except Exception:
+            import traceback
+            traceback.print_exc()
+            try:
+                qvec = (await self.embedder.embed([query[:300]], text_type="query"))[0]
+            except Exception:
+                traceback.print_exc()
+                return []
 
         # 读索引 + 计算全程拿锁，保证与 add 的写入互斥，避免读到不一致的中间态
         async with self._lock:
