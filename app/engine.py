@@ -126,11 +126,13 @@ class MemoryEngine:
         embedder: Embedder,
         dense_threshold: float = 0.15,
         max_cached_users: int = 32,
+        bm25_max_docs: int = 30000,
     ):
         self.storage = storage
         self.embedder = embedder
         self.dense_threshold = dense_threshold
         self._max_cached = max_cached_users
+        self._bm25_max_docs = bm25_max_docs
         # 用 OrderedDict 做 LRU 缓存：内存只保留最近使用的若干用户索引，避免 Full 评测
         # 大量 user_id 时内存无限增长（数据在 SQLite，淘汰后可随时重新加载）
         self._users: OrderedDict[str, UserIndex] = OrderedDict()
@@ -154,8 +156,10 @@ class MemoryEngine:
         idx.created_ts = [r["created_ts"] for r in rows]
         idx.vectors = [unpack_vec(r["embedding"]) for r in rows]
         idx.bm25 = BM25()
-        for c in idx.contents:
-            idx.bm25.add(tokenize(c))
+        if len(idx.contents) <= self._bm25_max_docs:
+            for c in idx.contents:
+                idx.bm25.add(tokenize(c))
+        # 超大用户跳过 BM25（只走向量检索），避免内存爆导致 500/OOM
         idx.loaded = True
         self._users[user_id] = idx
         self._users.move_to_end(user_id)
@@ -259,11 +263,15 @@ class MemoryEngine:
             dense = cosine(idx.vectors, qvec)
             tokens = tokenize(query)
             bm25_scores = idx.bm25.scores(tokens)
+            nb = len(bm25_scores)
+
+            def bs(i: int) -> float:
+                return bm25_scores[i] if i < nb else 0.0
 
             # 相关性门控：BM25 命中 或 稠密相似度达标 才算候选，否则返回空（abstain）
             candidates = [
                 i for i in range(len(dense))
-                if bm25_scores[i] > 0.0 or dense[i] >= self.dense_threshold
+                if bs(i) > 0.0 or dense[i] >= self.dense_threshold
             ]
             if not candidates:
                 return []
@@ -276,9 +284,9 @@ class MemoryEngine:
             bm25_order = [
                 i
                 for i in sorted(
-                    candidates, key=lambda i: (bm25_scores[i], idx.created_ts[i]), reverse=True
+                    candidates, key=lambda i: (bs(i), idx.created_ts[i]), reverse=True
                 )
-                if bm25_scores[i] > 0.0
+                if bs(i) > 0.0
             ][:m]
 
             # RRF（Reciprocal Rank Fusion）合并两种排序

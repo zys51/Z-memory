@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 import hmac
+import traceback
 from contextlib import asynccontextmanager
 from typing import Any, Optional
 
@@ -48,6 +49,7 @@ def create_app(
         embedder,
         dense_threshold=config.DENSE_THRESHOLD,
         max_cached_users=config.MAX_CACHED_USERS,
+        bm25_max_docs=config.BM25_MAX_DOCS,
     )
 
     @asynccontextmanager
@@ -96,7 +98,9 @@ def create_app(
         try:
             await engine.add(user_id, session_id, request_id, req.messages or [])
         except Exception as exc:  # 嵌入 API 失败等 → 500，平台可重试
-            return JSONResponse(status_code=500, content={"detail": {"reason": str(exc)}})
+            print(f"[ADD_500] user={user_id} req={request_id} exc={type(exc).__name__}: {exc}", flush=True)
+            traceback.print_exc()
+            return JSONResponse(status_code=500, content={"detail": {"reason": f"{type(exc).__name__}: {exc}"}})
         return {
             "success": True,
             "request_id": request_id,
@@ -126,7 +130,9 @@ def create_app(
         try:
             data = await engine.search(user_id, query, top_k)
         except Exception as exc:
-            return JSONResponse(status_code=500, content={"detail": {"reason": str(exc)}})
+            print(f"[SEARCH_500] user={user_id} q={query[:120]!r} exc={type(exc).__name__}: {exc}", flush=True)
+            traceback.print_exc()
+            return JSONResponse(status_code=500, content={"detail": {"reason": f"{type(exc).__name__}: {exc}"}})
         return {"data": data}
 
     return app

@@ -40,3 +40,5 @@ PORT = int(_env("PORT", "8080") or 8080)
 TOP_K_MAX = 100
 # 内存中最多缓存的用户索引数（LRU 淘汰，超出后从 SQLite 重新加载，控制内存占用）
 MAX_CACHED_USERS = int(_env("MAX_CACHED_USERS", "32") or 32)
+# 单用户超过该条数时跳过 BM25 索引（只走向量检索），避免超大用户把内存撑爆
+BM25_MAX_DOCS = int(_env("BM25_MAX_DOCS", "30000") or 30000)
