@@ -55,7 +55,8 @@ EnvironmentFile=$(pwd)/.env
 WantedBy=multi-user.target
 EOF
 systemctl daemon-reload
-systemctl enable --now memcomp
+systemctl enable memcomp
+systemctl restart memcomp
 
 echo "==> [6/6] 健康检查"
 sleep 2

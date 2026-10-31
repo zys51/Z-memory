@@ -14,6 +14,14 @@ import httpx
 from . import config
 
 _TOKEN_RE = re.compile(r"[a-z0-9]+")
+_MAX_EMBED_CHARS = 6000
+
+
+def _truncate(text: str) -> str:
+    """超长文本截断：保留开头（通常是问题）和结尾，避免超过嵌入接口输入上限（400）。"""
+    if len(text) <= _MAX_EMBED_CHARS:
+        return text
+    return text[:4000] + " " + text[-2000:]
 
 
 def hash_embed(texts: list[str], dim: int) -> list[list[float]]:
@@ -64,6 +72,7 @@ class Embedder:
     async def embed(self, texts: list[str], text_type: str = "document") -> list[list[float]]:
         if not texts:
             return []
+        texts = [_truncate(t) for t in texts]
         if self.offline:
             return hash_embed(texts, self.dim)
 
